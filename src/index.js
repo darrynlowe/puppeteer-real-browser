@@ -1,4 +1,5 @@
 import { startSession, closeSession } from './module/chromium.js'
+import AmazonCaptchaPlugin from "@mihnea.dev/puppeteer-extra-amazon-captcha";
 import puppeteer from 'puppeteer-extra';
 import { notice, slugify } from './module/general.js'
 import { autoSolve, setSolveStatus } from './module/turnstile.js'
@@ -38,6 +39,9 @@ const setTarget = ({ status = true }) => {
 export const connect = ({ args = [], headless = 'auto', customConfig = {}, proxy = {}, skipTarget = [], fingerprint = true, turnstile = false, connectOption = {}, tf = true }) => {
     return new Promise(async (resolve, reject) => {
 
+        const amazonCaptchaPlugin = AmazonCaptchaPlugin.default();
+        puppeteer.use(amazonCaptchaPlugin);
+        
         global_target_status = tf
 
         const { chromeSession, cdpSession, chrome, xvfbsession } = await startSession({
@@ -45,7 +49,7 @@ export const connect = ({ args = [], headless = 'auto', customConfig = {}, proxy
             headless: headless,
             customConfig: customConfig,
             proxy: proxy
-        })
+        })        
 
         const browser = await puppeteer.connect({
             targetFilter: (target) => targetFilter({ target: target, skipTarget: skipTarget }),
